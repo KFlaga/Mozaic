@@ -1,0 +1,52 @@
+﻿using Microsoft.Win32;
+using System;
+using System.IO;
+using System.Windows;
+
+namespace MozaicLand
+{
+    public static class FileOp
+    {
+        public delegate void FileDelegate(Stream file, string filePath);
+
+        public static void LoadFromFile(FileDelegate onFileOpen, string filter)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = filter;
+            bool? res = fileDialog.ShowDialog();
+            if(res != null && res == true && File.Exists(fileDialog.FileName))
+            {
+                Stream fs = fileDialog.OpenFile();
+                try
+                {
+                    onFileOpen(fs, fileDialog.FileName);
+                }
+                catch(Exception exc)
+                {
+                    MessageBox.Show("Error while reading from file: " + exc.Message, "Error");
+                }
+                fs.Close();
+            }
+        }
+
+        public static void SaveToFile(FileDelegate onFileOpen, string filter)
+        {
+            SaveFileDialog fileDialog = new SaveFileDialog();
+            fileDialog.Filter = filter;
+            bool? res = fileDialog.ShowDialog();
+            if(res != null && res == true)
+            {
+                Stream fs = fileDialog.OpenFile();
+                try
+                {
+                    onFileOpen(fs, fileDialog.FileName);
+                }
+                catch(Exception exc)
+                {
+                    MessageBox.Show("Error while writing to file: " + exc.Message, "Error");
+                }
+                fs.Close();
+            }
+        }
+    }
+}
