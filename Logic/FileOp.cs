@@ -9,7 +9,9 @@ namespace MozaicLand
     {
         public delegate void FileDelegate(Stream file, string filePath);
 
-        public static void LoadFromFile(FileDelegate onFileOpen, string filter)
+        public const string AllFilesFilter = "All files|*.*";
+
+        public static void LoadFromFile(FileDelegate onFileOpen, string filter = AllFilesFilter)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = filter;
@@ -29,7 +31,7 @@ namespace MozaicLand
             }
         }
 
-        public static void SaveToFile(FileDelegate onFileOpen, string filter)
+        public static void SaveToFile(FileDelegate onFileOpen, string filter = AllFilesFilter)
         {
             SaveFileDialog fileDialog = new SaveFileDialog();
             fileDialog.Filter = filter;
