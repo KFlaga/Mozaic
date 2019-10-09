@@ -7,7 +7,7 @@
     <ProjectGuid>{AA0C1B65-0251-4946-B851-14DEDB123058}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Logic</RootNamespace>
+    <RootNamespace>MozaicLand</RootNamespace>
     <AssemblyName>Logic</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,8 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="ColorCartridge.cs" />
+    <Compile Include="ColorTable.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Mozaic.cs" />
+    <Compile Include="Pallet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Units.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

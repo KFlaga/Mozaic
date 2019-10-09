@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A0ADC247-C004-49A1-9A96-401EB67F55C2}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Gui</RootNamespace>
+    <RootNamespace>MozaicLand</RootNamespace>
     <AssemblyName>Gui</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
