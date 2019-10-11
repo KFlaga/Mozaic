@@ -31,9 +31,7 @@ namespace Gui
         Image<Bgr, byte> fragmentedImage;
         Image<Bgr, byte> quantizedImage;
         Image<Bgr, byte> framedImage;
-
-        System.Windows.Controls.Image image = new System.Windows.Controls.Image();
-
+        
         ColorTable testTable = new ColorTable(new Dictionary<int, BlockColor>()
         {
             { 0, new BlockColor{ Color = Color.FromArgb(0, 0, 0) } },
@@ -52,8 +50,6 @@ namespace Gui
 
             interpolationMethodInput.ItemsSource = Enum.GetValues(typeof(Emgu.CV.CvEnum.Inter)).Cast<Emgu.CV.CvEnum.Inter>();
             interpolationMethodInput.SelectedIndex = 0;
-
-            imageArea.Child = image;
         }
 
         private void LoadImage(object sender, RoutedEventArgs e)
@@ -61,7 +57,7 @@ namespace Gui
             loadedImage = ImageLoader.FromFile();
             if (loadedImage != null)
             {
-                image.Source = ImageLoader.ImageSourceForBitmap(loadedImage.Bitmap);
+                imageViewer.Source = ImageLoader.ImageSourceForBitmap(loadedImage.Bitmap);
                 fragmentedImage = null;
                 framedImage = null;
                 quantizedImage = null;
@@ -167,7 +163,7 @@ namespace Gui
             }
 
             int pixelsPerBlock = 4;
-            int pixelsPerFrame = (int)Math.Ceiling(sizes.frameSize / sizes.blockSize);
+            int pixelsPerFrame = (int)Math.Ceiling(pixelsPerBlock * sizes.frameSize / sizes.blockSize);
             framedImage = Fragmenter.DrawWithFrames(i, pixelsPerBlock, pixelsPerFrame, Color.White);
             return true;
         }
@@ -180,7 +176,7 @@ namespace Gui
 
         private void UpdateImage(Image<Bgr, byte> i)
         {
-            image.Source = ImageLoader.ImageSourceForBitmap(i.Bitmap);
+            imageViewer.Source = ImageLoader.ImageSourceForBitmap(i.Bitmap);
         }
     }
 }

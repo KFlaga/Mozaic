@@ -11,7 +11,7 @@
             <RowDefinition Height="100*"/>
             <RowDefinition Height="120"/>
         </Grid.RowDefinitions>
-        <local:ZoomingScrollControl Grid.Row="0" x:Name="imageArea"/>
+        <local:ImageViewer Grid.Row="0" x:Name="imageViewer"/>
         <StackPanel Grid.Row="1">
             <Button Click="LoadImage">Load Image</Button>
             <Button Click="FragmentImage">Fragment Image</Button>
