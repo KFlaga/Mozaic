@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Media;
+using System.Drawing;
 
 namespace MozaicLand
 {
     public struct BlockColor
     {
-        Color Color { get; set; }
-        double Cost { get; set; }
+        public Color Color { get; set; }
+        public double Cost { get; set; }
     }
 
     public class ColorTable
     {
+        public const int NoColor = -1;
+
         public Dictionary<int, BlockColor> Colors { get; private set; }
 
         public ColorTable()

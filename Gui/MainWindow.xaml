@@ -5,8 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Gui"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*"/>
+            <RowDefinition Height="120"/>
+        </Grid.RowDefinitions>
+        <local:ZoomingScrollControl Grid.Row="0" x:Name="imageArea"/>
+        <StackPanel Grid.Row="1">
+            <Button Click="LoadImage">Load Image</Button>
+            <Button Click="FragmentImage">Fragment Image</Button>
+            <Button Click="QuantizeImage">Quantize Image</Button>
+            <StackPanel Orientation="Horizontal">
+                <Label>Block size</Label>
+                <TextBox x:Name="blockSizeInput" MinWidth="40" Text="20"/>
+                <Label>mm</Label>
+                <Label>Frame size</Label>
+                <TextBox x:Name="frameSizeInput" MinWidth="40" Text="5"/>
+                <Label>mm</Label>
+                <Label>Real width</Label>
+                <TextBox x:Name="realWidthInput" MinWidth="40" Text="2500"/>
+                <Label>mm</Label>
+                <Label>Real height</Label>
+                <TextBox x:Name="realHeightInput" MinWidth="40" Text="2500"/>
+                <Label>mm</Label>
+            </StackPanel>
+            <ComboBox x:Name="interpolationMethodInput"/>
+        </StackPanel>
     </Grid>
 </Window>

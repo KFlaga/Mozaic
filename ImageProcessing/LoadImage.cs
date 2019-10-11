@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 
 namespace ImageProcessing
 {
-    public class CvTest
+    public class ImageLoader
     {
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -37,29 +37,16 @@ namespace ImageProcessing
             }
         }
 
-        public static void Cvtest()
+        public static Emgu.CV.Image<Bgr, byte> FromFile()
         {
-            // Load image from file
-            // Resulting image fromat is probably 8bit BGR channels
-            Emgu.CV.Mat mat1 = Emgu.CV.CvInvoke.Imread("image.png", Emgu.CV.CvEnum.ImreadModes.Color);
-
-            // Create image manually
-            Emgu.CV.Image<Bgr, byte> image = new Emgu.CV.Image<Bgr, byte>(100, 100);
-            image.Data[0, 0, 0] = 128;
-
-            // Mat may be needed for some open cv algorithms
-            Emgu.CV.Mat mat2 = image.Mat;
-            
-            // Convert to format which can be shown inside WPF Image control
-            ImageSource wpfImage = ImageSourceForBitmap(image.Bitmap);
-        }
-
-        public static Emgu.CV.Mat LoadImageFromFile()
-        {
-            Emgu.CV.Mat loadedImage = null;
+            Emgu.CV.Image<Bgr, byte> loadedImage = null;
             FileOp.LoadFromFile((s, path) =>
             {
-                loadedImage = Emgu.CV.CvInvoke.Imread(path, Emgu.CV.CvEnum.ImreadModes.Color);
+                var mat = Emgu.CV.CvInvoke.Imread(path, Emgu.CV.CvEnum.ImreadModes.Color);
+                if(mat != null)
+                {
+                    loadedImage = mat.ToImage<Bgr, byte>();
+                }
             });
             return loadedImage;
         }

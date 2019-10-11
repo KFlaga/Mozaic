@@ -8,13 +8,13 @@ namespace MozaicLand
     {
         public Pallet[,] Palletes { get; private set; }
 
-        public Units.mm PalletHeight => Palletes.Length > 0 ? Palletes[0, 0].Height : (Units.mm)0.0;
-        public Units.mm PalletWidth => Palletes.Length > 0 ? Palletes[0, 0].Width : (Units.mm)0.0;
+        public double PalletHeight => Palletes.Length > 0 ? Palletes[0, 0].Height : 0.0;
+        public double PalletWidth => Palletes.Length > 0 ? Palletes[0, 0].Width : 0.0;
 
-        public Units.mm Height => Palletes.GetLength(0) * PalletHeight;
-        public Units.mm Width => Palletes.GetLength(1) * PalletWidth;
+        public double Height => Palletes.Rows() * PalletHeight;
+        public double Width => Palletes.Cols() * PalletWidth;
 
-        public Mozaic(int rows, int cols, int palletRows, int palletCols, Units.mm blockSize)
+        public Mozaic(int rows, int cols, int palletRows, int palletCols, double blockSize)
         {
             Palletes = new Pallet[rows, cols];
             for(int r = 0; r < rows; ++r)
@@ -31,6 +31,11 @@ namespace MozaicLand
             Palletes = pallets;
         }
 
+        public int PositionToPalletIndex(int row, int col)
+        {
+            return col + row * Palletes.Cols();
+        }
+
         public int CountBlocksWithColor(int colorIndex)
         {
             return Palletes.ToEnumerable().Aggregate(0, (acc, pallet) => acc + pallet.CountBlocksWithColor(colorIndex));
@@ -42,7 +47,7 @@ namespace MozaicLand
 
             foreach (Pallet pallet in Palletes)
             {
-                foreach (int color in pallet.BlocksColors.ToEnumerable())
+                foreach (int color in pallet.BlocksColors)
                 {
                     if (colors.ContainsKey(color))
                     {

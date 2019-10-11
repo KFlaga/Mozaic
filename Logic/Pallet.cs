@@ -6,18 +6,18 @@ namespace MozaicLand
     public class Pallet
     {
         public int[,] BlocksColors { get; private set; } // BlockColor is index in ColorTable
-        public Units.mm BlockSize { get; private set; }
+        public double BlockSize { get; private set; }
 
-        public Units.mm Height => BlocksColors.GetLength(0) * BlockSize;
-        public Units.mm Width => BlocksColors.GetLength(1) * BlockSize;
+        public double Height => BlocksColors.GetLength(0) * BlockSize;
+        public double Width => BlocksColors.GetLength(1) * BlockSize;
 
-        public Pallet(int rows, int cols, Units.mm blockSize)
+        public Pallet(int rows, int cols, double blockSize)
         {
             BlocksColors = new int[rows, cols];
             BlockSize = blockSize;
         }
 
-        public Pallet(int[,] blocks, Units.mm blockSize)
+        public Pallet(int[,] blocks, double blockSize)
         {
             BlocksColors = blocks;
             BlockSize = blockSize;
@@ -31,7 +31,7 @@ namespace MozaicLand
         public Dictionary<int, int> CountColors()
         {
             Dictionary<int, int> colors = new Dictionary<int, int>();
-            foreach(int color in BlocksColors.ToEnumerable())
+            foreach(int color in BlocksColors)
             {
                 if(colors.ContainsKey(color))
                 {
