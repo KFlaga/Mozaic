@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace MozaicLand
@@ -8,13 +9,11 @@ namespace MozaicLand
     {
         public Pallet[,] Palletes { get; private set; }
 
-        public double PalletHeight => Palletes.Length > 0 ? Palletes[0, 0].Height : 0.0;
-        public double PalletWidth => Palletes.Length > 0 ? Palletes[0, 0].Width : 0.0;
+        // Assumes all Palletes have same size
+        public SizeF PalletSize => Palletes.Length > 0 ? Palletes[0, 0].Size : new SizeF();
+        public SizeF Size => new SizeF(PalletSize.Width * Palletes.Cols(), PalletSize.Height * Palletes.Rows());
 
-        public double Height => Palletes.Rows() * PalletHeight;
-        public double Width => Palletes.Cols() * PalletWidth;
-
-        public Mozaic(int rows, int cols, int palletRows, int palletCols, double blockSize)
+        public Mozaic(int rows, int cols, int palletRows, int palletCols, float blockSize)
         {
             Palletes = new Pallet[rows, cols];
             for(int r = 0; r < rows; ++r)

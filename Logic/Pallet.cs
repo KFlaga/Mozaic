@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace MozaicLand
@@ -6,21 +7,34 @@ namespace MozaicLand
     public class Pallet
     {
         public int[,] BlocksColors { get; private set; } // BlockColor is index in ColorTable
-        public double BlockSize { get; private set; }
-
-        public double Height => BlocksColors.GetLength(0) * BlockSize;
-        public double Width => BlocksColors.GetLength(1) * BlockSize;
-
-        public Pallet(int rows, int cols, double blockSize)
+        public float BlockSize { get; set; }
+        public float FrameSize { get; set; }
+        
+        public SizeF Size => new SizeF(BlockTopLeft(BlocksColors.Rows(), BlocksColors.Cols()));
+        
+        public Pallet(int rows, int cols, float blockSize, float frameSize = 0) :
+            this(new int[rows, cols], blockSize, frameSize)
         {
-            BlocksColors = new int[rows, cols];
-            BlockSize = blockSize;
         }
 
-        public Pallet(int[,] blocks, double blockSize)
+        public Pallet(int[,] blocks, float blockSize, float frameSize = 0)
         {
             BlocksColors = blocks;
             BlockSize = blockSize;
+            FrameSize = frameSize;
+        }
+
+        public static PointF BlockTopLeft(int row, int col, float blockSize, float frameSize)
+        {
+            return new PointF(
+                col * blockSize + (col + 1) * frameSize,
+                row * blockSize + (row + 1) * frameSize
+            );
+        }
+
+        public PointF BlockTopLeft(int row, int col)
+        {
+            return Pallet.BlockTopLeft(row, col, BlockSize, FrameSize);
         }
 
         public int CountBlocksWithColor(int colorIndex)

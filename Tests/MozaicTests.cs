@@ -12,7 +12,7 @@ namespace Tests
         [TestInitialize]
         public void Init()
         {
-            double size = 20.0;
+            float size = 20;
 
             mozaic = new Mozaic(new Pallet[2, 2]
             {

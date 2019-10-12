@@ -16,6 +16,16 @@ namespace MozaicLand
 
         public Dictionary<int, BlockColor> Colors { get; private set; }
 
+        public Color Color(int i)
+        {
+            return Colors[i].Color;
+        }
+
+        public double Cost(int i)
+        {
+            return Colors[i].Cost;
+        }
+
         public ColorTable()
         {
             Colors = new Dictionary<int, BlockColor>();

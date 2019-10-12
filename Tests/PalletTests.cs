@@ -10,7 +10,7 @@ namespace Tests
         [TestMethod]
         public void CountBlocksWithColor()
         {
-            Pallet pallet = new Pallet(new int[2, 2] { { 2, 3 }, { 3, 4 } }, 20.0);
+            Pallet pallet = new Pallet(new int[2, 2] { { 2, 3 }, { 3, 4 } }, 20.0f);
 
             Assert.AreEqual(1, pallet.CountBlocksWithColor(2));
             Assert.AreEqual(2, pallet.CountBlocksWithColor(3));
@@ -20,7 +20,7 @@ namespace Tests
         [TestMethod]
         public void CountColors()
         {
-            Pallet pallet = new Pallet(new int[2, 2] { { 2, 3 }, { 3, 4 } }, 20.0);
+            Pallet pallet = new Pallet(new int[2, 2] { { 2, 3 }, { 3, 4 } }, 20.0f);
 
             Dictionary<int, int> colors = pallet.CountColors();
 
