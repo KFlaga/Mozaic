@@ -64,11 +64,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblingTests.cs" />
     <Compile Include="ColorQuantizationTests.cs" />
     <Compile Include="ColorTableTests.cs" />
     <Compile Include="ImageFragmentationTests.cs" />
     <Compile Include="MiscTests.cs" />
     <Compile Include="MozaicTests.cs" />
+    <Compile Include="WorkingSpaceTests.cs" />
     <Compile Include="PalletTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

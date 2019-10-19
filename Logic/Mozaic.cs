@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace MozaicLand
 {
+    // Mozaic is a matrix of thightly placed Pallets, representing whole picture.
+    // May represent both target state and partially assembled state by assigning null to some of pallets.
     public class Mozaic
     {
         public Pallet[,] Palletes { get; private set; }

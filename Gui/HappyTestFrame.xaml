@@ -32,6 +32,7 @@
             </StackPanel>
             <ComboBox x:Name="interpolationMethodInput"/>
             <Button Click="DrawWorkspace">Draw Workspace</Button>
+            <Button Click="AssemblyMozaic">Assembly Mozaic</Button>
         </StackPanel>
     </Grid>
 </UserControl>

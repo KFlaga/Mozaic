@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Drawing;
 
 namespace MozaicLand
 {
@@ -19,6 +20,28 @@ namespace MozaicLand
         public static int Cols<T>(this T[,] t)
         {
             return t.GetLength(1);
+        }
+
+        public static void Fill<T>(this T[,] t, T value)
+        {
+            for(int r = 0; r < t.Rows(); ++r)
+            {
+                for (int c = 0; c < t.Cols(); ++c)
+                {
+                    t[r, c] = value;
+                }
+            }
+        }
+
+        public static void Fill<T>(this T[,] t, Func<int, int, T> generator)
+        {
+            for (int r = 0; r < t.Rows(); ++r)
+            {
+                for (int c = 0; c < t.Cols(); ++c)
+                {
+                    t[r, c] = generator(r, c);
+                }
+            }
         }
 
         private struct AlwaysGreater : IComparable
@@ -67,6 +90,26 @@ namespace MozaicLand
                 }
             }
             return maxElement;
+        }
+
+        public static PointF Sub(this PointF a, PointF b)
+        {
+            return new PointF(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static PointF Add(this PointF a, PointF b)
+        {
+            return new PointF(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static float Length(this PointF a)
+        {
+            return (float)Math.Sqrt(a.X * a.X + a.Y * a.Y);
+        }
+
+        public static float DistanceTo(this PointF a, PointF b)
+        {
+            return a.Sub(b).Length();
         }
     }
 }

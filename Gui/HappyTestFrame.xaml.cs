@@ -277,5 +277,10 @@ namespace MozaicLand
 
             UpdateImage(drawer.Drawing);
         }
+
+        private void AssemblyMozaic(object sender, RoutedEventArgs e)
+        {
+            // TODO
+        }  
     }
 }

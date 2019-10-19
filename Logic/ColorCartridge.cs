@@ -4,9 +4,9 @@ namespace MozaicLand
 {
     public class ColorCartridge
     {
-        public int ColorIndex { get; private set; }
-        public int InitialCount { get; private set; }
-        public int CurrentCount { get; set; }
+        public int ColorIndex { get; private set; } = ColorTable.NoColor;
+        public int InitialCount { get; private set; } = 0;
+        public int CurrentCount { get; set; } = 0;
         
         public ColorCartridge(int colorIndex, int count)
         {
@@ -14,12 +14,5 @@ namespace MozaicLand
             InitialCount = count;
             CurrentCount = count;
         }
-    }
-
-    public class ColorCartridgeSlot
-    {
-        public PointF TopLeft { get; set; }
-        public SizeF Size { get; set; }
-        public ColorCartridge Cartridge { get; set; }
     }
 }
