@@ -60,6 +60,8 @@ namespace MozaicLand
             { 7, new BlockColor{ Color = Color.FromArgb(255, 255, 255) } }
         });
 
+        AssemblingSequence testSequence;
+
         private void LoadImage(object sender, RoutedEventArgs e)
         {
             loadedImage = ImageLoader.FromFile();
@@ -211,76 +213,141 @@ namespace MozaicLand
             WorkspaceDrawer drawer = new WorkspaceDrawer(400, 400, Color.White)
             {
                 WorkspaceSize = new SizeF(1000, 1000),
-                BlockSize = 20,
-                FrameSize = 5,
-                PalletesSpacing = 20,
                 FrameColor = Color.Gray,
                 ColorTable = testTable
             };
 
-            // Pallet size = 130 x 130
-
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(100, 100));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(250, 100));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(400, 100));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(400, 250));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(400, 400));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(250, 400));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(100, 400));
-            drawer.DrawPallet(RandPallet(5, 5, 20, 5), new PointF(100, 250));
-
-            float deg45 = (float)(Math.PI / 4);
-            drawer.DrawRobot(new PointF(265, 265), new SizeF(100, 100), -deg45, -deg45);
-
+            SizeF palletSize = new SizeF(125, 125);
             SizeF cartridgeSize = new SizeF(70, 50);
-            List<ColorCartridgeSlot> cartridges = new List<ColorCartridgeSlot>()
-            {
-                new ColorCartridgeSlot()
-                {
-                    TopLeft = new PointF(100, 40),
-                    Size = cartridgeSize,
-                    Cartridge = new ColorCartridge(NextColor(), 10)
-                },
-                new ColorCartridgeSlot()
-                {
-                    TopLeft = new PointF(180, 40),
-                    Size = cartridgeSize,
-                    Cartridge = new ColorCartridge(NextColor(), 0)
-                },
-                new ColorCartridgeSlot()
-                {
-                    TopLeft = new PointF(260, 40),
-                    Size = cartridgeSize,
-                    Cartridge = new ColorCartridge(NextColor(), 10)
-                },
-                new ColorCartridgeSlot()
-                {
-                    TopLeft = new PointF(340, 40),
-                    Size = cartridgeSize,
-                    Cartridge = new ColorCartridge(NextColor(), 10)
-                },
-                new ColorCartridgeSlot()
-                {
-                    TopLeft = new PointF(540, 100),
-                    Size = new SizeF(cartridgeSize.Height, cartridgeSize.Width),
-                    Cartridge = new ColorCartridge(NextColor(), 10)
-                },
-                new ColorCartridgeSlot()
-                {
-                    TopLeft = new PointF(540, 180),
-                    Size = new SizeF(cartridgeSize.Height, cartridgeSize.Width),
-                    Cartridge = new ColorCartridge(NextColor(), 10)
-                },
-            };
 
-            drawer.DrawColorCardridges(cartridges);
+            WorkingSpace workingSpace = new WorkingSpace(new Robot(), palletSize, cartridgeSize, 10.0f);
+
+            for(int i = 0; i < 8; ++i)
+            {
+                workingSpace.GetPalletSlot(i).Pallet = RandPallet(5, 5, 20, 5);
+            }
+
+            for(int i = 0; i < workingSpace.CartridgesSlotsCount; ++i)
+            {
+                workingSpace.GetCartridgeSlot(i).Cartridge = new ColorCartridge(NextColor(), 10);
+            }
+
+            workingSpace.GetCartridgeSlot(3).Cartridge = new ColorCartridge(NextColor(), 0);
+
+            drawer.Draw(workingSpace, new PointF(200, 200));
 
             UpdateImage(drawer.Drawing);
         }
 
+        private IAssemblingAction GetNextBlock(Robot robot, WorkingSpace workingSpace)
+        {
+            // First non-empty cartridge
+            for(int i = 0; i < workingSpace.CartridgesSlotsCount; ++i)
+            {
+                var slot = workingSpace.GetCartridgeSlot(i);
+                if (slot.Cartridge != null && slot.Cartridge.CurrentCount > 0)
+                {
+                    return new GetBlockAction(robot, slot);
+                }
+            }
+
+            return null;
+        }
+        
+        private IAssemblingAction PutNextBlock(Robot robot, WorkingSpace workingSpace)
+        {
+            // First non-empty block
+            for (int i = 0; i < 8; ++i)
+            {
+                var slot = workingSpace.GetPalletSlot(i);
+                if (slot.Pallet != null)
+                {
+                    for(int r = 0; r < slot.Pallet.BlocksColors.Rows(); ++r)
+                    {
+                        for (int c = 0; c < slot.Pallet.BlocksColors.Cols(); ++c)
+                        {
+                            if(slot.Pallet.BlocksColors[r, c] < 0)
+                            {
+                                return new PutBlockAction(robot, slot, new System.Drawing.Point(c, r));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private void AssemblyMozaic(object sender, RoutedEventArgs e)
         {
-            // TODO
-        }  
+            SizeF palletSize = new SizeF(125, 125);
+            SizeF cartridgeSize = new SizeF(70, 50);
+
+            Robot robot = new Robot()
+            {
+                CatchBlockTime = TimeSpan.FromSeconds(1),
+                PutBlockTime = TimeSpan.FromSeconds(1.5),
+                MovementSpeed = 5.0f
+            };
+
+            WorkingSpace workingSpace = new WorkingSpace(robot, palletSize, cartridgeSize, 10.0f);
+
+            for (int i = 0; i < 8; ++i)
+            {
+                workingSpace.GetPalletSlot(i).Pallet = new Pallet(5, 5, 20, 5);
+            }
+
+            for (int i = 0; i < workingSpace.CartridgesSlotsCount; ++i)
+            {
+                workingSpace.GetCartridgeSlot(i).Cartridge = new ColorCartridge(NextColor(), 10);
+            }
+
+            testSequence = new AssemblingSequence()
+            {
+                WorkingSpace = workingSpace,
+                Actions = new List<IAssemblingAction>()
+            };
+
+
+            WorkspaceDrawer drawer = new WorkspaceDrawer(400, 400, Color.White)
+            {
+                WorkspaceSize = new SizeF(1000, 1000),
+                FrameColor = Color.Gray,
+                ColorTable = testTable
+            };
+
+            drawer.Draw(testSequence.WorkingSpace, new PointF(200, 200));
+
+            UpdateImage(drawer.Drawing);
+        }
+
+        private void NextStep(object sender, RoutedEventArgs e)
+        {
+            IAssemblingAction action = GetNextBlock(testSequence.WorkingSpace.Robot, testSequence.WorkingSpace);
+            if(action != null)
+            {
+                testSequence.Actions.Add(action);
+                testSequence.ExecuteNext();
+            }
+            action = PutNextBlock(testSequence.WorkingSpace.Robot, testSequence.WorkingSpace);
+            if (action != null)
+            {
+                testSequence.Actions.Add(action);
+                testSequence.ExecuteNext();
+            }
+
+            timeText.Text = testSequence.ExecutionTime.TotalSeconds.ToString();
+
+            WorkspaceDrawer drawer = new WorkspaceDrawer(400, 400, Color.White)
+            {
+                WorkspaceSize = new SizeF(1000, 1000),
+                FrameColor = Color.Gray,
+                ColorTable = testTable
+            };
+
+            drawer.Draw(testSequence.WorkingSpace, new PointF(200, 200));
+
+            UpdateImage(drawer.Drawing);
+        }
     }
 }

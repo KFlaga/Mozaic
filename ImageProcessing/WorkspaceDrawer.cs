@@ -13,9 +13,6 @@ namespace ImageProcessing
         public Image<Bgr, byte> Drawing { get; private set; }
 
         public SizeF WorkspaceSize { get; set; }
-        public float BlockSize { get; set; }
-        public float FrameSize { get; set; }
-        public float PalletesSpacing { get; set; }
 
         public ColorTable ColorTable { get; set; }
 
@@ -26,7 +23,30 @@ namespace ImageProcessing
             Drawing = new Image<Bgr, byte>(rows, cols, new Bgr(bg));
         }
 
-        public void DrawPallet(Pallet pallet, PointF topLeft)
+        public void Draw(WorkingSpace workingSpace, PointF topLeft)
+        {
+            for(int i = 0; i < 8; ++i)
+            {
+                var slot = workingSpace.GetPalletSlot(i);
+                if(slot.Pallet != null)
+                {
+                    Draw(slot.Pallet, topLeft.Add(slot.TopLeft));
+                }
+            }
+
+            for (int i = 0; i < workingSpace.CartridgesSlotsCount; ++i)
+            {
+                var slot = workingSpace.GetCartridgeSlot(i);
+                if (slot.Cartridge != null)
+                {
+                    Draw(slot.Cartridge, topLeft.Add(slot.TopLeft), slot.Size);
+                }
+            }
+
+            Draw(workingSpace.Robot, topLeft, workingSpace.Pallets[0, 0].Size);
+        }
+
+        public void Draw(Pallet pallet, PointF topLeft)
         {
             DrawRect(new Bgr(FrameColor), topLeft, pallet.Size);
             for(int r = 0; r < pallet.BlocksColors.Rows(); ++r)
@@ -38,28 +58,33 @@ namespace ImageProcessing
                         pallet.BlockTopLeft(r, c).Y + topLeft.Y
                     );
 
-                    DrawRect(new Bgr(ColorTable.Color(pallet.BlocksColors[r, c])), p, new SizeF(BlockSize, BlockSize));
+                    int colorIndex = pallet.BlocksColors[r, c];
+                    if(colorIndex < 0)
+                    {
+                        DrawCross(new Bgr(Color.Black), p, new SizeF(pallet.BlockSize, pallet.BlockSize));
+                    }
+                    else
+                    {
+                        DrawRect(new Bgr(ColorTable.Color(colorIndex)), p, new SizeF(pallet.BlockSize, pallet.BlockSize));
+                    }
                 }
             }
         }
 
-        public void DrawColorCardridges(List<ColorCartridgeSlot> cartridges)
+        public void Draw(List<ColorCartridgeSlot> cartridges)
         {
             foreach(var c in cartridges)
             {
                 if(c.Cartridge != null)
                 {
-                    DrawColorCardridge(
-                        c.Cartridge.CurrentCount == 0 ? -1 : c.Cartridge.ColorIndex,
-                        c.TopLeft,
-                        c.Size
-                    );
+                    Draw(c.Cartridge, c.TopLeft, c.Size);
                 }
             }
         }
 
-        public void DrawColorCardridge(int colorIndex, PointF topLeft, SizeF size)
+        public void Draw(ColorCartridge c, PointF topLeft, SizeF size)
         {
+            int colorIndex = c.CurrentCount == 0 ? -1 : c.ColorIndex;
             if (size.Height > 16 && size.Width > 16)
             {
                 // Draw frame of cartridge
@@ -80,10 +105,10 @@ namespace ImageProcessing
             }
         }
 
-        public void DrawRobot(PointF topLeft, SizeF size, double armAngle = 0.0, double effectorAngle = 0.0)
+        public void Draw(Robot robot, PointF offset, SizeF size)
         {
-            PointF center = new PointF(topLeft.X + size.Width / 2, topLeft.Y + size.Height / 2);
-
+            PointF center = robot.Center.Add(offset);
+            float armAngle = 0;
             // Base
             RotatedRect rect = new RotatedRect(ToPixel(center), ToPixel(size), 0);
             CvInvoke.Ellipse(Drawing, rect, new Bgr(Color.Black).MCvScalar, 1);
@@ -97,21 +122,20 @@ namespace ImageProcessing
                 center.Y - 0.8f * size.Width * (float)Math.Cos(armAngle)
             );
             CvInvoke.Line(Drawing, ToPixel(center), ToPixel(effectorCenter), new Bgr(Color.Black).MCvScalar, 2);
-
             // Effector
-            float effectorHalfLength = BlockSize * 0.7f;
-            float fingerHalfLength = BlockSize * 0.4f;
+            //float effectorHalfLength = size.Width * 0.07f;
+            //float fingerHalfLength = size.Width * 0.04f;
 
-            PointF leftFingerMiddle = new PointF(
-                effectorCenter.X - effectorHalfLength * (float)Math.Cos(effectorAngle),
-                effectorCenter.Y + effectorHalfLength * (float)Math.Sin(effectorAngle)
-            );
-            PointF rightFingerMiddle = new PointF(
-                effectorCenter.X + effectorHalfLength * (float)Math.Cos(effectorAngle),
-                effectorCenter.Y - effectorHalfLength * (float)Math.Sin(effectorAngle)
-            );
+            //PointF leftFingerMiddle = new PointF(
+            //    effectorCenter.X - effectorHalfLength * (float)Math.Cos(effectorAngle),
+            //    effectorCenter.Y + effectorHalfLength * (float)Math.Sin(effectorAngle)
+            //);
+            //PointF rightFingerMiddle = new PointF(
+            //    effectorCenter.X + effectorHalfLength * (float)Math.Cos(effectorAngle),
+            //    effectorCenter.Y - effectorHalfLength * (float)Math.Sin(effectorAngle)
+            //);
 
-            CvInvoke.Line(Drawing, ToPixel(leftFingerMiddle), ToPixel(rightFingerMiddle), new Bgr(Color.Green).MCvScalar, 2);
+            //CvInvoke.Line(Drawing, ToPixel(leftFingerMiddle), ToPixel(rightFingerMiddle), new Bgr(Color.Green).MCvScalar, 2);
         }
 
         private void DrawRect(Bgr color, PointF topLeft, SizeF size)

@@ -9,7 +9,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100*"/>
-            <RowDefinition Height="140"/>
+            <RowDefinition Height="190"/>
         </Grid.RowDefinitions>
         <local:ImageViewer Grid.Row="0" x:Name="imageViewer"/>
         <StackPanel Grid.Row="1">
@@ -33,6 +33,12 @@
             <ComboBox x:Name="interpolationMethodInput"/>
             <Button Click="DrawWorkspace">Draw Workspace</Button>
             <Button Click="AssemblyMozaic">Assembly Mozaic</Button>
+            <StackPanel Orientation="Horizontal">
+                <Button Click="NextStep" Width="200">Next Step</Button>
+                <Label>Total time</Label>
+                <TextBox x:Name="timeText" MinWidth="60" Text="5"/>
+                <Label>s</Label>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -13,36 +13,51 @@ namespace MozaicLand
         TimeSpan Execute(TimeSpan currentTime);
     }
 
-    public class GetColorAction : IAssemblingAction
+    // TODO: exchange of cartridges ?
+
+    public class GetBlockAction : IAssemblingAction
     {
-        public WorkingSpace WorkingSpace { get; set; }
+        public Robot Robot { get; set; }
         public ColorCartridgeSlot Target { get; set; }
+
+        public GetBlockAction(Robot robot, ColorCartridgeSlot target)
+        {
+            Robot = robot;
+            Target = target;
+        }
 
         public TimeSpan Execute(TimeSpan currentTime)
         {
             if (Target.Cartridge.CurrentCount <= 0)
             {
-                throw new InvalidOperationException("Attemt to get block from empty cartridge");
+                throw new InvalidOperationException("Attempt to get block from empty cartridge");
             }
 
-            currentTime += WorkingSpace.Robot.MoveTo(Target.CatchHole);
-            currentTime += WorkingSpace.Robot.CatchBlock(Target.Cartridge.ColorIndex);
+            currentTime += Robot.MoveTo(Target.CatchHole);
+            currentTime += Robot.CatchBlock(Target.Cartridge.ColorIndex);
             Target.Cartridge.CurrentCount -= 1;
             return currentTime;
         }
     }
 
-    public class PutColorAction : IAssemblingAction
+    public class PutBlockAction : IAssemblingAction
     {
         public Robot Robot { get; set; }
         public PalletSlot Pallet { get; set; }
         public Point Block { get; set; }
 
+        public PutBlockAction(Robot robot, PalletSlot pallet, Point block)
+        {
+            Robot = robot;
+            Pallet = pallet;
+            Block = block;
+        }
+
         public TimeSpan Execute(TimeSpan currentTime)
         {
             if (Pallet.Pallet.BlocksColors[Block.Y, Block.X] >= 0)
             {
-                throw new InvalidOperationException("Attemt to put block into already filled cell");
+                throw new InvalidOperationException("Attempt to put block into already filled cell");
             }
 
             PointF blockPos = Pallet.TopLeft.Add(Pallet.Pallet.BlockCenter(Block.Y, Block.X));
@@ -59,7 +74,7 @@ namespace MozaicLand
         public List<IAssemblingAction> Actions { get; set; }
 
         public int NextAction { get; private set; } = 0;
-        public TimeSpan ExecutionTime { get; set; }
+        public TimeSpan ExecutionTime { get; set; } = TimeSpan.Zero;
 
         public void ExecuteNext()
         {

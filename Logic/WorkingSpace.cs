@@ -47,7 +47,7 @@ namespace MozaicLand
         public TimeSpan PutBlockTime { get; set; }
 
         public PointF Effector { get; private set; }
-        public int CurrentBlock { get; private set; }
+        public int CurrentBlock { get; private set; } = -1;
         
         // Moves effector to given position. Returns time robot needs to reach target.
         // Assumes constant speed and linear movement.
@@ -70,7 +70,7 @@ namespace MozaicLand
 
         public TimeSpan PutBlock()
         {
-            if (CurrentBlock != -1)
+            if (CurrentBlock == -1)
             {
                 throw new InvalidOperationException("Attempt to put block with empty effector");
             }
@@ -85,19 +85,24 @@ namespace MozaicLand
     public class WorkingSpace
     {
         public PalletSlot[,] Pallets { get; private set; } = new PalletSlot[3, 3]; // Pallets[1, 1] is always null
-        public ColorCartridgeSlot[,] ColorCartridges { get; private set; } // Only first and last row and column is used, except corners:
+        public ColorCartridgeSlot[,] CartridgesSlots { get; private set; } // Only first and last row and column is used, except corners:
                                                                            // [0, k], [k, 0], [last, k] and [k, last] are ok for k != 0 and k != last
+        public int CartridgesSlotsCount { get; private set; }
         public Robot Robot { get; private set; }
         public SizeF Size { get; private set; }
-
-        // TODO: consider adding some space between elements
-        public WorkingSpace(Robot robot, SizeF palletSize, SizeF cartridgeSize)
+        public float PalletesSeparation { get; private set; }
+        
+        public WorkingSpace(Robot robot, SizeF palletSize, SizeF cartridgeSize, float palletesSeparation)
         {
-            float topSideWidth = 3 * palletSize.Width;
-            float totalWidth = topSideWidth + 2 * cartridgeSize.Height;
+            PalletesSeparation = palletesSeparation;
 
-            float leftSideHeight = 3 * palletSize.Height;
-            float totalHeight = leftSideHeight + 2 * cartridgeSize.Height; // Left side cartridge is turned by 90deg, so we use Height again
+            float cartridgeMargin = cartridgeSize.Height + PalletesSeparation;
+
+            float topSideWidth = 3 * palletSize.Width + 2 * PalletesSeparation;
+            float totalWidth = topSideWidth + 2 * cartridgeMargin;
+
+            float leftSideHeight = 3 * palletSize.Height + 2 * PalletesSeparation;
+            float totalHeight = leftSideHeight + 2 * cartridgeMargin; // Left side cartridge is turned by 90deg, so we use Height again
 
             Size = new SizeF(totalWidth, totalHeight);
 
@@ -105,13 +110,13 @@ namespace MozaicLand
             Robot = robot;
             Robot.Center = center;
 
-            InitPalletes(palletSize, cartridgeSize);
+            InitPalletes(palletSize, cartridgeSize, cartridgeMargin);
             InitCartridges(cartridgeSize, topSideWidth, leftSideHeight);
         }
 
-        private void InitPalletes(SizeF palletSize, SizeF cartridgeSize)
+        private void InitPalletes(SizeF palletSize, SizeF cartridgeSize, float cartridgeMargin)
         {
-            PointF palletesTopLeft = new PointF(cartridgeSize.Height, cartridgeSize.Height);
+            PointF palletesTopLeft = new PointF(cartridgeMargin, cartridgeMargin);
             Pallets.Fill((r, c) =>
             {
                 if (r == 1 && c == 1) { return null; }
@@ -119,7 +124,8 @@ namespace MozaicLand
                 {
                     Pallet = null,
                     Size = palletSize,
-                    TopLeft = palletesTopLeft.Add(new PointF(c * palletSize.Width, r * palletSize.Height))
+                    TopLeft = palletesTopLeft.Add(
+                        new PointF(c * (palletSize.Width + PalletesSeparation), r * (palletSize.Height + PalletesSeparation)))
                 };
             });
         }
@@ -133,54 +139,103 @@ namespace MozaicLand
                 throw new ArgumentException("Color cartridge is bigger than 3 palletes");
             }
 
-            ColorCartridges = new ColorCartridgeSlot[cartridgesInRow + 2, cartridgesInCol + 2];
+            CartridgesSlots = new ColorCartridgeSlot[cartridgesInCol + 2, cartridgesInRow + 2];
             
-            float spacingInRow = cartridgesInRow > 1 ? (topSideWidth - cartridgesInRow * cartridgeSize.Width) / cartridgesInRow : 0;
+            float spacingInRow = cartridgesInRow > 1 ? (topSideWidth - cartridgesInRow * cartridgeSize.Width) / (cartridgesInRow - 1) : 0;
 
-            float rowLeft = cartridgeSize.Height;
+            float rowLeft = cartridgeSize.Height + PalletesSeparation;
             float topRowTop = 0;
-            float botRowTop = cartridgeSize.Height + leftSideHeight;
+            float botRowTop = cartridgeSize.Height + leftSideHeight + 2 * PalletesSeparation;
             
             for (int i = 0; i < cartridgesInRow; ++i)
             {
                 float left = rowLeft + i * (cartridgeSize.Width + spacingInRow);
-                ColorCartridges[0, 1 + i] = new ColorCartridgeSlot()
+                CartridgesSlots[0, 1 + i] = new ColorCartridgeSlot()
                 {
                     Cartridge = null,
                     Size = cartridgeSize,
                     TopLeft = new PointF(left, topRowTop)
                 };
-                ColorCartridges[ColorCartridges.Rows() - 1, 1 + i] = new ColorCartridgeSlot()
+                CartridgesSlots[CartridgesSlots.Rows() - 1, 1 + i] = new ColorCartridgeSlot()
                 {
                     Cartridge = null,
                     Size = cartridgeSize,
-                    TopLeft = new PointF(left, topRowTop)
+                    TopLeft = new PointF(left, botRowTop)
                 };
             }
 
-            float spacingInCol = cartridgesInCol > 1 ? (leftSideHeight - cartridgesInCol * cartridgeSize.Width) / cartridgesInCol : 0;
+            float spacingInCol = cartridgesInCol > 1 ? (leftSideHeight - cartridgesInCol * cartridgeSize.Width) / (cartridgesInCol - 1) : 0;
 
-            float colTop = cartridgeSize.Height;
+            float colTop = cartridgeSize.Height + PalletesSeparation;
             float leftColLeft = 0;
-            float rightColLeft = cartridgeSize.Height + topSideWidth;
+            float rightColLeft = cartridgeSize.Height + topSideWidth + 2 * PalletesSeparation;
             SizeF turnedSize = new SizeF(cartridgeSize.Height, cartridgeSize.Width);
 
             for (int i = 0; i < cartridgesInCol; ++i)
             {
                 float top = colTop + i * (cartridgeSize.Width + spacingInCol);
-                ColorCartridges[1 + i, 0] = new ColorCartridgeSlot()
+                CartridgesSlots[1 + i, 0] = new ColorCartridgeSlot()
                 {
                     Cartridge = null,
                     Size = turnedSize,
                     TopLeft = new PointF(leftColLeft, top)
                 };
-                ColorCartridges[1 + i, ColorCartridges.Cols() - 1] = new ColorCartridgeSlot()
+                CartridgesSlots[1 + i, CartridgesSlots.Cols() - 1] = new ColorCartridgeSlot()
                 {
                     Cartridge = null,
                     Size = turnedSize,
                     TopLeft = new PointF(rightColLeft, top)
                 };
             }
+
+            CartridgesSlotsCount = 2 * (CartridgesSlots.Rows() - 2 + CartridgesSlots.Cols() - 2);
+        }
+        
+        public PalletSlot GetPalletSlot(int index)
+        {
+            if(index < 0 || index >= 8)
+            {
+                throw new ArgumentException("Index is invalid");
+            }
+
+            switch(index)
+            {
+                case 0: return Pallets[0, 0];
+                case 1: return Pallets[0, 1];
+                case 2: return Pallets[0, 2];
+                case 3: return Pallets[1, 0];
+                case 4: return Pallets[1, 2];
+                case 5: return Pallets[2, 0];
+                case 6: return Pallets[2, 1];
+                case 7: return Pallets[2, 2];
+            }
+            return null;
+        }
+
+        // Cartridges are indexed: 0 is leftmost item at top row and index increments clockwise
+        public ColorCartridgeSlot GetCartridgeSlot(int index)
+        {
+            if (index < 0 || index >= CartridgesSlotsCount)
+            {
+                throw new ArgumentException("Index is invalid");
+            }
+
+            if (index < CartridgesSlots.Cols() - 2)
+            {
+                return CartridgesSlots[0, 1 + index];
+            }
+            index -= CartridgesSlots.Cols() - 2;
+            if (index < CartridgesSlots.Rows() - 2)
+            {
+                return CartridgesSlots[1 + index, CartridgesSlots.Cols() - 1];
+            }
+            index -= CartridgesSlots.Rows() - 2;
+            if (index < CartridgesSlots.Cols() - 2)
+            {
+                return CartridgesSlots[CartridgesSlots.Rows() - 1, CartridgesSlots.Cols() - 2 - index];
+            }
+            index -= CartridgesSlots.Cols() - 2;
+            return CartridgesSlots[CartridgesSlots.Rows() - 2 - index, 0];
         }
     }
 }
