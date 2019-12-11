@@ -39,7 +39,7 @@ namespace MozaicLand
 
             public bool IsInvalid()
             {
-                return realHeight == 0.0;
+                return  realHeight == 0.0;
             }
         }
 
@@ -217,7 +217,7 @@ namespace MozaicLand
                 ColorTable = testTable
             };
 
-            SizeF palletSize = new SizeF(125, 125);
+            SizeF palletSize = new SizeF(250, 125);
             SizeF cartridgeSize = new SizeF(70, 50);
 
             WorkingSpace workingSpace = new WorkingSpace(new Robot(), palletSize, cartridgeSize, 10.0f);
